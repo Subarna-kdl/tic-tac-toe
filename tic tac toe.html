@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Tic Tac Toe</title>
+    <style>
+      :root {
+        color-scheme: light;
+        box-sizing: border-box;
+        padding: 0;
+      }
+      body {
+        background: #fff;
+        color: #222;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 24px 12px;
+      }
+      #board {
+        display: grid;
+        grid-template-columns: repeat(3, 90px);
+        gap: 6px;
+        justify-content: center;
+        margin: 20px auto;
+      }
+      .cell {
+        width: 90px;
+        height: 90px;
+        font-size: 40px;
+        background: #fff;
+        color: #222;
+        border: 2px solid #222;
+        cursor: pointer;
+      }
+      #again {
+        display: none;
+        font-size: 16px;
+        padding: 8px 16px;
+        background: #fff;
+        color: #222;
+        border: 2px solid #222;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Tic Tac Toe</h1>
+    <p id="status">Your turn (X)</p>
+    <div id="board"></div>
+    <button id="again">Play again</button>
+
+    <script>
+      var wins = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+      var board, over;
+      var boardEl = document.getElementById("board");
+      var statusEl = document.getElementById("status");
+      var againBtn = document.getElementById("again");
+
+      function start() {
+        board = ["", "", "", "", "", "", "", "", ""];
+        over = false;
+        boardEl.innerHTML = "";
+        for (var i = 0; i < 9; i++) {
+          var b = document.createElement("button");
+          b.className = "cell";
+          b.onclick = (function (n) {
+            return function () {
+              play(n);
+            };
+          })(i);
+          boardEl.appendChild(b);
+        }
+        statusEl.textContent = "Your turn (X)";
+        againBtn.style.display = "none";
+      }
+
+      function winner() {
+        for (var i = 0; i < wins.length; i++) {
+          var w = wins[i];
+          if (
+            board[w[0]] &&
+            board[w[0]] === board[w[1]] &&
+            board[w[0]] === board[w[2]]
+          )
+            return board[w[0]];
+        }
+        return board.indexOf("") === -1 ? "draw" : null;
+      }
+
+      function mark(i, who) {
+        board[i] = who;
+        boardEl.children[i].textContent = who;
+      }
+
+      function finish() {
+        var w = winner();
+        if (!w) return false;
+        over = true;
+        statusEl.textContent =
+          w === "draw"
+            ? "It's a draw!"
+            : w === "X"
+              ? "You win!"
+              : "Computer wins!";
+        againBtn.style.display = "inline-block";
+        return true;
+      }
+
+      function play(i) {
+        if (over || board[i]) return;
+        mark(i, "X");
+        if (finish()) return;
+        mark(botMove(), "O");
+        finish();
+      }
+
+      function almostWin(who) {
+        for (var i = 0; i < wins.length; i++) {
+          var w = wins[i],
+            mine = 0,
+            empty = -1;
+          for (var k = 0; k < 3; k++) {
+            if (board[w[k]] === who) mine++;
+            else if (!board[w[k]]) empty = w[k];
+          }
+          if (mine === 2 && empty !== -1) return empty;
+        }
+        return -1;
+      }
+
+      function botMove() {
+        var m = almostWin("O");
+        if (m !== -1) return m;
+        m = almostWin("X");
+        if (m !== -1 && Math.random() < 0.7) return m;
+        var empty = [];
+        for (var j = 0; j < 9; j++) if (!board[j]) empty.push(j);
+        return empty[Math.floor(Math.random() * empty.length)];
+      }
+
+      againBtn.onclick = start;
+      start();
+    </script>
+  </body>
+</html>
